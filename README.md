@@ -1,0 +1,1 @@
+The following scripts are for the formation of a smart contract wallet that will be published on the Ethereum blockchain for multiple purposes. These include the use of general savings, multiple addresses being able to handle one set of funds, rational spending and withdrawals with time based transactions being able to lock and unlock specific withdrawals.  
