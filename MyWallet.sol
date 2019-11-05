@@ -11,12 +11,11 @@ contract MyWallet {
     address payable[] public auth_keys;
     
     mapping (address => uint) public times_withdrawn;
-    mapping (uint => address) public block_of_withdrawl;
     mapping (address => bool) public key_is_authorized;
     
     event AuthKeyAddded(address indexed auth_key);
     event DepositMade(address indexed key, uint indexed amount);
-    event WithdrawlMade(address indexed key, uint indexed amount);
+    event WithdrawlMade(address indexed key, uint indexed amount, uint indexed time);
     
     modifier onlyAuthKey() {
         require(key_is_authorized[msg.sender] = true);
@@ -28,7 +27,7 @@ contract MyWallet {
         min_withdrawl = 1 szabo;
         max_keys = 1;
         owner = msg.sender;
-        auth_keys.push(owner);
+        auth_keys.push(owner) - 1;
         times_withdrawn[msg.sender] = 0;
         key_is_authorized[msg.sender] = true;
     }
@@ -46,6 +45,18 @@ contract MyWallet {
         max_keys = max_keys + 1;
         emit AuthKeyAddded(auth_key);
     }
+    
+    function removeAuthKey(address bad_key) public onlyAuthKey returns (uint index) {
+        for (uint i = 0; i < auth_keys.length; i++) {
+            if (auth_keys[i] == bad_key) {
+                delete(auth_keys[i]);
+                auth_keys.length--;
+                key_is_authorized[bad_key] = false;
+            }
+        }
+        max_keys = max_keys - 1;
+        return auth_keys.length;
+    }
 
     function deposit() public payable returns (bool success) {
         address(this).balance == address(this).balance + msg.value;
@@ -59,9 +70,8 @@ contract MyWallet {
         msg.sender.transfer(amount);
         address(this).balance == address(this).balance - amount;
         contract_balance = contract_balance - amount;
-        times_withdrawn[msg.sender] += 1;
-        block_of_withdrawl[block.timestamp] = msg.sender;
-        emit WithdrawlMade(msg.sender, amount);
+        times_withdrawn[msg.sender]++;
+        emit WithdrawlMade(msg.sender, amount, block.timestamp);
         return success;
     }
     
