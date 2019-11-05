@@ -6,7 +6,9 @@ contract MyWallet {
     uint public min_withdrawl;
     uint public max_keys = 5;
     uint public contract_balance;
+    uint lockingPeriod;
     address payable public owner;
+    bool walletsLocked;
     
     address payable[] public auth_keys;
     
@@ -17,6 +19,11 @@ contract MyWallet {
     event AuthKeyAddded(address indexed auth_key);
     event DepositMade(address indexed key, uint indexed amount);
     event WithdrawlMade(address indexed key, uint indexed amount, uint indexed time);
+    
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
     
     modifier onlyAuthKey() {
         require(key_is_authorized[msg.sender] = true);
@@ -75,6 +82,43 @@ contract MyWallet {
         times_withdrawn[msg.sender]++;
         emit WithdrawlMade(msg.sender, amount, block.timestamp);
         return success;
+    }
+    
+    function timeLock(uint amount_of_time, address k1, address k2, address k3, address k4) public onlyOwner returns (bool success) {
+        uint time_block = amount_of_time;
+        bool locked;
+        require (time_block > 7 days, "The minimum locking period is 7 days, after this time the wallets can be unlocked");
+        if (time_block > now) {
+            locked == true;
+        } do {
+            key_is_authorized[k1] = false;
+            key_is_authorized[k2] = false;
+            key_is_authorized[k3] = false;
+            key_is_authorized[k4] = false;
+        } while (locked = true);
+        walletsLocked = true;
+        lockingPeriod = time_block;
+        return success;
+    }
+    
+    function unlockWallets(address k1, address k2, address k3, address k4) public onlyOwner {
+        require(now != lockingPeriod && walletsLocked == false);
+        require(key_is_authorized[k1] == false &&
+                key_is_authorized[k2] == false && 
+                key_is_authorized[k3] == false && 
+                key_is_authorized[k4] == false);
+        key_is_authorized[k1] = true;
+        key_is_authorized[k2] = true;
+        key_is_authorized[k3] = true;
+        key_is_authorized[k4] = true;
+    }
+    
+    function checkLockingPeriod(uint time) public view returns(bool, uint) {
+        if (lockingPeriod >= time) {
+            return (walletsLocked, lockingPeriod);
+        } else {
+            revert("The locking period is over");
+        }
     }
     
     function () external payable {
