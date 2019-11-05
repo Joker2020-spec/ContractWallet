@@ -10,6 +10,7 @@ contract MyWallet {
     
     address payable[] public auth_keys;
     
+    mapping (address => uint) public times_deposited;
     mapping (address => uint) public times_withdrawn;
     mapping (address => bool) public key_is_authorized;
     
@@ -60,7 +61,8 @@ contract MyWallet {
 
     function deposit() public payable returns (bool success) {
         address(this).balance == address(this).balance + msg.value;
-        contract_balance = address(this).balance; 
+        contract_balance = address(this).balance;
+        times_deposited[msg.sender]++;
         emit DepositMade(msg.sender, msg.value);
         return success;
     }
