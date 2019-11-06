@@ -35,7 +35,7 @@ contract MyWallet {
         _;
     }
     
-    constructor () public {
+    constructor () public payable {
         max_withdrawl = 1000 ether;
         min_withdrawl = 1 szabo;
         max_keys = 1;
@@ -52,7 +52,7 @@ contract MyWallet {
                 revert('Key already stored in array');
             }
         }
-        auth_keys.push(AuthKey(auth_key, 0, 0, false));
+        authorized_keys[auth_key] = AuthKey({key: auth_key, deposits: 0, withdraws: 0, restricted: false});
        //  times_withdrawn[auth_key] = 0;
         // key_is_authorized[auth_key] = true;
         max_keys = max_keys + 1;
