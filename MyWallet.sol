@@ -41,7 +41,7 @@ contract MyWallet {
     }
     
     function addAuthroizedKey(address payable auth_key) public onlyAuthKey {
-        require(max_keys <= 4, "There are 4 keys or less");
+        require(max_keys <= 4, "There are 5 keys or less");
         for (uint i = 0; i < auth_keys.length; i++) {
                 if(auth_keys[i] == auth_key) {
                 revert('Key already stored in array');
