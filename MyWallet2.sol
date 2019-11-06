@@ -33,7 +33,8 @@ contract MyWallet2 {
     }
     
     modifier onlyAuthKey() {
-        require(authorized_keys[msg.sender].restricted = false);
+        require(authorized_keys[msg.sender].key == msg.sender);
+        require(authorized_keys[msg.sender].restricted == false);
         _;
     }
     
