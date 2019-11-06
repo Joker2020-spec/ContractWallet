@@ -11,14 +11,12 @@ contract MyWallet {
     bool walletsLocked;
     
     address payable[] public auth_keys;
-    
-    mapping (address => uint) public times_deposited;
-    mapping (address => uint) public times_withdrawn;
-    mapping (address => bool) public key_is_authorized;
+
+    mapping (address => AuthKey) public authorized_keys;
     
     struct AuthKey {
         address key;
-        uint deposit;
+        uint deposits;
         uint withdraws;
         bool restricted;
     }
@@ -33,7 +31,7 @@ contract MyWallet {
     }
     
     modifier onlyAuthKey() {
-        require(key_is_authorized[msg.sender] = true);
+        require(authorized_keys[msg.sender].restricted = false);
         _;
     }
     
@@ -42,9 +40,9 @@ contract MyWallet {
         min_withdrawl = 1 szabo;
         max_keys = 1;
         owner = msg.sender;
-        auth_keys.push(owner) - 1;
-        times_withdrawn[msg.sender] = 0;
-        key_is_authorized[msg.sender] = true;
+        AuthKey storage owner_key = authorized_keys[msg.sender];
+        authorized_keys[msg.sender] = AuthKey({key: owner, deposits: msg.value, withdraws: 0, restricted: false});
+        auth_keys.push(owner);
     }
     
     function addAuthroizedKey(address payable auth_key) public onlyAuthKey {
@@ -54,9 +52,9 @@ contract MyWallet {
                 revert('Key already stored in array');
             }
         }
-        auth_keys.push(auth_key);
-        times_withdrawn[auth_key] = 0;
-        key_is_authorized[auth_key] = true;
+        auth_keys.push(AuthKey(auth_key, 0, 0, false));
+       //  times_withdrawn[auth_key] = 0;
+        // key_is_authorized[auth_key] = true;
         max_keys = max_keys + 1;
         emit AuthKeyAddded(auth_key);
     }
@@ -66,7 +64,7 @@ contract MyWallet {
             if (auth_keys[i] == bad_key) {
                 delete(auth_keys[i]);
                 auth_keys.length--;
-                key_is_authorized[bad_key] = false;
+                authorized_keys[bad_key].restricted = true;
             }
         }
         max_keys = max_keys - 1;
@@ -76,7 +74,7 @@ contract MyWallet {
     function deposit() public payable returns (bool success) {
         address(this).balance == address(this).balance + msg.value;
         contract_balance = address(this).balance;
-        times_deposited[msg.sender]++;
+        authorized_keys[msg.sender].deposits++;
         emit DepositMade(msg.sender, msg.value);
         return success;
     }
@@ -86,7 +84,7 @@ contract MyWallet {
         msg.sender.transfer(amount);
         address(this).balance == address(this).balance - amount;
         contract_balance = contract_balance - amount;
-        times_withdrawn[msg.sender]++;
+        authorized_keys[msg.sender].withdraws++;
         emit WithdrawlMade(msg.sender, amount, block.timestamp);
         return success;
     }
@@ -98,10 +96,10 @@ contract MyWallet {
         if (time_block > now) {
             locked == true;
         }
-        key_is_authorized[k1] = false;
-        key_is_authorized[k2] = false;
-        key_is_authorized[k3] = false;
-        key_is_authorized[k4] = false;
+        authorized_keys[k1].restricted = true;
+        authorized_keys[k2].restricted = true;
+        authorized_keys[k3].restricted = true;
+        authorized_keys[k4].restricted = true;
         locked = true;
         walletsLocked = true;
         lockingPeriod = time_block;
@@ -111,14 +109,14 @@ contract MyWallet {
     function unlockWallets(address k1, address k2, address k3, address k4) public onlyOwner {
         checkLockingPeriod();
         require(now >= lockingPeriod && walletsLocked == true);
-        require(key_is_authorized[k1] == false &&
-                key_is_authorized[k2] == false && 
-                key_is_authorized[k3] == false && 
-                key_is_authorized[k4] == false);
-        key_is_authorized[k1] = true;
-        key_is_authorized[k2] = true;
-        key_is_authorized[k3] = true;
-        key_is_authorized[k4] = true;
+        require(authorized_keys[k1].restricted == true &&
+                authorized_keys[k2].restricted == true && 
+                authorized_keys[k3].restricted == true && 
+                authorized_keys[k4].restricted == true);
+        authorized_keys[k1].restricted = false;
+        authorized_keys[k2].restricted = false;
+        authorized_keys[k3].restricted = false;
+        authorized_keys[k4].restricted = false;
     }
     
     function checkLockingPeriod() public view returns(bool, uint) {
