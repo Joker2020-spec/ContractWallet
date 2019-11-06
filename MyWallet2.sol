@@ -7,7 +7,9 @@ contract MyWallet {
     uint public max_keys = 5;
     uint public contract_balance;
     uint lockingPeriod;
+    
     address payable public owner;
+    
     bool walletsLocked;
     
     address payable[] public auth_keys;
@@ -40,9 +42,9 @@ contract MyWallet {
         min_withdrawl = 1 szabo;
         max_keys = 1;
         owner = msg.sender;
-        AuthKey storage owner_key = authorized_keys[msg.sender];
         authorized_keys[msg.sender] = AuthKey({key: owner, deposits: msg.value, withdraws: 0, restricted: false});
         auth_keys.push(owner);
+        emit AuthKeyAddded(owner);
     }
     
     function addAuthroizedKey(address payable auth_key) public onlyAuthKey {
@@ -53,8 +55,6 @@ contract MyWallet {
             }
         }
         authorized_keys[auth_key] = AuthKey({key: auth_key, deposits: 0, withdraws: 0, restricted: false});
-       //  times_withdrawn[auth_key] = 0;
-        // key_is_authorized[auth_key] = true;
         max_keys = max_keys + 1;
         emit AuthKeyAddded(auth_key);
     }
