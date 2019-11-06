@@ -113,8 +113,8 @@ contract MyWallet {
         key_is_authorized[k4] = true;
     }
     
-    function checkLockingPeriod(uint time) public view returns(bool, uint) {
-        if (lockingPeriod >= time) {
+    function checkLockingPeriod() public view returns(bool, uint) {
+        if (lockingPeriod >= now) {
             return (walletsLocked, lockingPeriod);
         } else {
             revert("The locking period is over");
