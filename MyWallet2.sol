@@ -1,6 +1,6 @@
 pragma solidity ^0.5.12;
 
-contract MyWallet {
+contract MyWallet2 {
     
     uint public max_withdrawl;
     uint public min_withdrawl;
@@ -17,7 +17,7 @@ contract MyWallet {
     mapping (address => AuthKey) public authorized_keys;
     
     struct AuthKey {
-        address key;
+        address payable key;
         uint deposits;
         uint withdraws;
         bool restricted;
@@ -125,6 +125,12 @@ contract MyWallet {
         } else {
             revert("The locking period is over");
         }
+    }
+    
+    function walletInfo(address key) public view returns (uint, uint, bool) {
+        return(authorized_keys[key].deposits,
+               authorized_keys[key].withdraws,
+               authorized_keys[key].restricted);
     }
     
     function () external payable {
