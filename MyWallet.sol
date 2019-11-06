@@ -102,7 +102,7 @@ contract MyWallet {
     }
     
     function unlockWallets(address k1, address k2, address k3, address k4) public onlyOwner {
-        require(now != lockingPeriod && walletsLocked == false);
+        require(now != lockingPeriod && walletsLocked == true);
         require(key_is_authorized[k1] == false &&
                 key_is_authorized[k2] == false && 
                 key_is_authorized[k3] == false && 
