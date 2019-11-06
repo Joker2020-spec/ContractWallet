@@ -134,8 +134,4 @@ contract MyWallet2 {
                authorized_keys[key].restricted);
     }
     
-    function () external payable {
-        require(msg.data.length == 0);
-    }
-    
 }
