@@ -7,7 +7,9 @@ contract MyWallet {
     uint public max_keys = 5;
     uint public contract_balance;
     uint lockingPeriod;
+    
     address payable public owner;
+    
     bool walletsLocked;
     
     address payable[] public auth_keys;
