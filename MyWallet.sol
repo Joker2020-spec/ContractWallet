@@ -90,18 +90,19 @@ contract MyWallet {
         require (time_block > 7 days, "The minimum locking period is 7 days, after this time the wallets can be unlocked");
         if (time_block > now) {
             locked == true;
-        } do {
-            key_is_authorized[k1] = false;
-            key_is_authorized[k2] = false;
-            key_is_authorized[k3] = false;
-            key_is_authorized[k4] = false;
-        } while (locked = true);
+        }
+        key_is_authorized[k1] = false;
+        key_is_authorized[k2] = false;
+        key_is_authorized[k3] = false;
+        key_is_authorized[k4] = false;
+        locked = true;
         walletsLocked = true;
         lockingPeriod = time_block;
         return success;
     }
     
     function unlockWallets(address k1, address k2, address k3, address k4) public onlyOwner {
+        checkLockingPeriod();
         require(now >= lockingPeriod && walletsLocked == true);
         require(key_is_authorized[k1] == false &&
                 key_is_authorized[k2] == false && 
