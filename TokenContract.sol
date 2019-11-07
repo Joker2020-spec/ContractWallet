@@ -188,3 +188,67 @@ contract ERC20 is Context, IERC20 {
         _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "ERC20: burn amount exceeds allowance"));
     }
 }
+
+contract TimeLockTokens is ERC20 {
+    
+    address[] public auth_keys;
+
+    mapping (address => AuthKey) public authorized_keys;
+    
+    struct AuthKey {
+        address payable key;
+        uint deposits;
+        uint withdraws;
+        bool restricted;
+    }
+    
+    event AuthKeyAddded(address indexed auth_key);
+    event DepositMade(address indexed key, address indexed recipient, uint amount, uint indexed time);
+    event WithdrawlMade(address indexed _from, address indexed recipient, uint amount, uint indexed time);
+    
+    function addAuthroizedKey(address payable auth_key) public {
+        // require(max_keys <= 4, "There are 5 keys or less");
+        for (uint i = 0; i < auth_keys.length; i++) {
+                if(auth_keys[i] == auth_key) {
+                revert('Key already stored in array');
+            }
+        }
+        authorized_keys[auth_key] = AuthKey({key: auth_key, deposits: 0, withdraws: 0, restricted: false});
+        // max_keys = max_keys + 1;
+        emit AuthKeyAddded(auth_key);
+    }
+    
+    function removeAuthKey(address bad_key) public returns (uint index) {
+        for (uint i = 0; i < auth_keys.length; i++) {
+            if (auth_keys[i] == bad_key) {
+                delete(auth_keys[i]);
+                auth_keys.length--;
+                authorized_keys[bad_key].restricted = true;
+            }
+        }
+        // max_keys = max_keys - 1;
+        return auth_keys.length;
+    }
+    
+    function deposit(address recipient, uint amount) public returns (bool success) {
+        // address(this).balance == address(this).balance + msg.value;
+        // contract_balance = address(this).balance;
+        if (authorized_keys[msg.sender].restricted == false) {
+            _transfer(msg.sender, recipient, amount);
+                authorized_keys[msg.sender].deposits++;
+        }    
+        emit DepositMade(msg.sender, recipient, amount, block.timestamp);
+        return success;
+    }
+    
+    function withdraw(address recipient, uint amount) public returns (bool success) {
+        // require(max_withdrawl >= amount && amount >= min_withdrawl);
+        msg.sender.transfer(amount);
+        address(this).balance == address(this).balance - amount;
+        // contract_balance = contract_balance - amount;
+        authorized_keys[msg.sender].withdraws++;
+        emit WithdrawlMade(msg.sender, recipient, amount, block.timestamp);
+        return success;
+    }
+    
+}
