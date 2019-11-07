@@ -191,6 +191,8 @@ contract ERC20 is Context, IERC20 {
 
 contract TimeLockTokens is ERC20 {
     
+    bool walletsLocked;
+    
     address[] public auth_keys;
 
     mapping (address => AuthKey) public authorized_keys;
@@ -201,6 +203,7 @@ contract TimeLockTokens is ERC20 {
         uint withdraws;
         bool restricted;
     }
+    
     
     event AuthKeyAddded(address indexed auth_key);
     event DepositMade(address indexed key, address indexed recipient, uint amount, uint indexed time);
@@ -248,6 +251,23 @@ contract TimeLockTokens is ERC20 {
         // contract_balance = contract_balance - amount;
         authorized_keys[msg.sender].withdraws++;
         emit WithdrawlMade(msg.sender, recipient, amount, block.timestamp);
+        return success;
+    }
+    
+    function timeLock(uint amount_of_time, address[] memory lockedWallets) public onlyOwner returns (bool success) {
+        uint time_block = amount_of_time;
+        bool locked;
+        require (time_block > 7 days, "The minimum locking period is 7 days, after this time the wallets can be unlocked");
+        address[] memory lockedKeys = lockedWallets;
+        for (uint i = 0; i < auth_keys.length; i++) {
+                if(auth_keys[i] = 
+                    
+                }
+        }
+         
+        locked = true;
+        walletsLocked = true;
+        // lockingPeriod = time_block;
         return success;
     }
     
