@@ -107,7 +107,7 @@ contract ERC20 is Context, IERC20 {
     constructor () public {
         owner = msg.sender;
         decimals = 9;
-        _totalSupply = 100000000000;
+        _totalSupply = 100.000000000;
         _balances[owner] = _balances[owner].add(_totalSupply);
     }
 
