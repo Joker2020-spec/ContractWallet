@@ -219,6 +219,15 @@ contract TimeLockTokens is ERC20 {
         _;
     }
     
+    modifier checkLock(uint _lockCheck) {
+        for (uint i = 0; i < times_locked.length; i++) {
+            if(times_locked.length == _lockCheck) {
+            revert("Unable to withdraw with this address untill lock is unlocked");
+            }
+        }
+        _;
+    }
+    
     function addAuthroizedKey(address payable auth_key) public {
         for (uint i = 0; i < auth_keys.length; i++) {
                 if(auth_keys[i] == auth_key) {
@@ -249,9 +258,9 @@ contract TimeLockTokens is ERC20 {
         return success;
     }
     
-    function withdraw(address recipient, uint amount) public isAuthorized returns (bool success) {
-        msg.sender.transfer(amount);
-        address(this).balance == address(this).balance - amount;
+    function withdraw(address recipient, uint amount, uint lockCheck) public isAuthorized checkLock(lockCheck) returns (bool success) {
+        require(authorized_keys[msg.sender].deposits > 1);
+        _transfer(msg.sender, recipient, amount);
         authorized_keys[msg.sender].withdraws++;
         emit WithdrawlMade(msg.sender, recipient, amount, block.timestamp);
         return success;
@@ -267,5 +276,9 @@ contract TimeLockTokens is ERC20 {
         locked = true;
         walletsLocked = true;
         return success;
+    }
+    
+    function getLocks() public view returns (uint) {
+        return(times_locked.length);
     }
 }
