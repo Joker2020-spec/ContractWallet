@@ -1,6 +1,6 @@
 pragma solidity ^0.5.12;
 
-contract MyWallet2 {
+contract MyWallet2  {
     
     uint public max_withdrawl;
     uint public min_withdrawl;
@@ -75,7 +75,9 @@ contract MyWallet2 {
     function deposit() public payable returns (bool success) {
         address(this).balance == address(this).balance + msg.value;
         contract_balance = address(this).balance;
-        authorized_keys[msg.sender].deposits++;
+        if (authorized_keys[msg.sender].restricted == false) {
+                authorized_keys[msg.sender].deposits++;
+        }    
         emit DepositMade(msg.sender, msg.value);
         return success;
     }
