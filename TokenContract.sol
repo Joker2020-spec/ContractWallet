@@ -95,7 +95,7 @@ contract ERC20 is Context, IERC20 {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
-    uint8 private decimals;
+    uint256 private decimals;
     
     address public owner;
     
@@ -107,7 +107,7 @@ contract ERC20 is Context, IERC20 {
     constructor () public {
         owner = msg.sender;
         decimals = 9;
-        _totalSupply = 100.000000000;
+        _totalSupply = 1000000 * (10 ** decimals);
         _balances[owner] = _balances[owner].add(_totalSupply);
     }
 
@@ -194,6 +194,7 @@ contract TimeLockTokens is ERC20 {
     bool walletsLocked;
     
     address[] public auth_keys;
+    Locked[] times_locked;
 
     mapping (address => AuthKey) public authorized_keys;
     
@@ -204,20 +205,22 @@ contract TimeLockTokens is ERC20 {
         bool restricted;
     }
     
+    struct Locked {
+        address[] isLocked;
+    }
+    
     
     event AuthKeyAddded(address indexed auth_key);
     event DepositMade(address indexed key, address indexed recipient, uint amount, uint indexed time);
     event WithdrawlMade(address indexed _from, address indexed recipient, uint amount, uint indexed time);
     
     function addAuthroizedKey(address payable auth_key) public {
-        // require(max_keys <= 4, "There are 5 keys or less");
         for (uint i = 0; i < auth_keys.length; i++) {
                 if(auth_keys[i] == auth_key) {
                 revert('Key already stored in array');
             }
         }
         authorized_keys[auth_key] = AuthKey({key: auth_key, deposits: 0, withdraws: 0, restricted: false});
-        // max_keys = max_keys + 1;
         emit AuthKeyAddded(auth_key);
     }
     
@@ -229,13 +232,10 @@ contract TimeLockTokens is ERC20 {
                 authorized_keys[bad_key].restricted = true;
             }
         }
-        // max_keys = max_keys - 1;
         return auth_keys.length;
     }
     
     function deposit(address recipient, uint amount) public returns (bool success) {
-        // address(this).balance == address(this).balance + msg.value;
-        // contract_balance = address(this).balance;
         if (authorized_keys[msg.sender].restricted == false) {
             _transfer(msg.sender, recipient, amount);
                 authorized_keys[msg.sender].deposits++;
@@ -245,10 +245,8 @@ contract TimeLockTokens is ERC20 {
     }
     
     function withdraw(address recipient, uint amount) public returns (bool success) {
-        // require(max_withdrawl >= amount && amount >= min_withdrawl);
         msg.sender.transfer(amount);
         address(this).balance == address(this).balance - amount;
-        // contract_balance = contract_balance - amount;
         authorized_keys[msg.sender].withdraws++;
         emit WithdrawlMade(msg.sender, recipient, amount, block.timestamp);
         return success;
@@ -259,16 +257,10 @@ contract TimeLockTokens is ERC20 {
         bool locked;
         require (time_block > 7 days, "The minimum locking period is 7 days, after this time the wallets can be unlocked");
         address[] memory lockedKeys = lockedWallets;
-        for (uint i = 0; i < auth_keys.length; i++) {
-                if(auth_keys[i] = 
-                    
-                }
-        }
-         
+        Locked memory newLocks = Locked({isLocked: lockedKeys});
+        times_locked.push(newLocks);
         locked = true;
         walletsLocked = true;
-        // lockingPeriod = time_block;
         return success;
     }
-    
 }
