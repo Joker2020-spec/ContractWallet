@@ -214,6 +214,11 @@ contract TimeLockTokens is ERC20 {
     event DepositMade(address indexed key, address indexed recipient, uint amount, uint indexed time);
     event WithdrawlMade(address indexed _from, address indexed recipient, uint amount, uint indexed time);
     
+    modifier isAuthorized() {
+        require(authorized_keys[msg.sender].restricted = false);
+        _;
+    }
+    
     function addAuthroizedKey(address payable auth_key) public {
         for (uint i = 0; i < auth_keys.length; i++) {
                 if(auth_keys[i] == auth_key) {
@@ -244,7 +249,7 @@ contract TimeLockTokens is ERC20 {
         return success;
     }
     
-    function withdraw(address recipient, uint amount) public returns (bool success) {
+    function withdraw(address recipient, uint amount) public isAuthorized returns (bool success) {
         msg.sender.transfer(amount);
         address(this).balance == address(this).balance - amount;
         authorized_keys[msg.sender].withdraws++;
