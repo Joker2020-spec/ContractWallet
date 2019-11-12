@@ -219,9 +219,14 @@ contract TimeLockTokens is ERC20 {
         _;
     }
     
-    modifier checkLock(uint _lockCheck) {
+    modifier checkLock(uint _lockCheck, address sender) {
+        sender = msg.sender;
         for (uint i = 0; i < times_locked.length; i++) {
             if(times_locked.length == _lockCheck) {
+                for(i = 0; i < is_locked.length; i++) {
+                    if(is_locked = sender) {
+                    revert("Unable to withdraw with this address untill lock is unlocked");
+                }
             revert("Unable to withdraw with this address untill lock is unlocked");
             }
         }
