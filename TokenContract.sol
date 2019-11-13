@@ -219,18 +219,18 @@ contract TimeLockTokens is ERC20 {
         _;
     }
     
-    modifier checkLock(uint _lockCheck, address sender) {
-        sender = msg.sender;
+    modifier checkLock() {
+        uint _lockCheck = getLocks();
         for (uint i = 0; i < times_locked.length; i++) {
             if(times_locked.length == _lockCheck) {
-                for(i = 0; i < is_locked.length; i++) {
-                    if(is_locked = sender) {
-                    revert("Unable to withdraw with this address untill lock is unlocked");
-                }
             revert("Unable to withdraw with this address untill lock is unlocked");
             }
         }
         _;
+    }
+    
+    constructor () public {
+        addAuthroizedKey(msg.sender);
     }
     
     function addAuthroizedKey(address payable auth_key) public {
@@ -240,6 +240,7 @@ contract TimeLockTokens is ERC20 {
             }
         }
         authorized_keys[auth_key] = AuthKey({key: auth_key, deposits: 0, withdraws: 0, restricted: false});
+        auth_keys.push(auth_key);
         emit AuthKeyAddded(auth_key);
     }
     
@@ -263,8 +264,9 @@ contract TimeLockTokens is ERC20 {
         return success;
     }
     
-    function withdraw(address recipient, uint amount, uint lockCheck) public isAuthorized checkLock(lockCheck) returns (bool success) {
-        require(authorized_keys[msg.sender].deposits > 1);
+    function withdraw(address recipient, uint amount) public checkLock() returns (bool success) {
+        require(authorized_keys[msg.sender].deposits >= 0);
+        // require(authorized_keys[msg.sender].restricted = false);
         _transfer(msg.sender, recipient, amount);
         authorized_keys[msg.sender].withdraws++;
         emit WithdrawlMade(msg.sender, recipient, amount, block.timestamp);
